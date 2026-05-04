@@ -5,3 +5,6 @@ import matplotlib.pyplot as plt
 from joblib import load
 import shap 
 
+
+logistic_model = load("")
+
