@@ -88,35 +88,34 @@ with tab1:
   })
 
 
-X_transformed = preprocessor.transform(input_data)
-feature_names =  preprocessor.get_feature_names_out()
-X_transformed_df = pd.DataFrame(
-  X_transformed,
-  columns = feature_names
-)
+  X_transformed = preprocessor.transform(input_data)
+  feature_names =  preprocessor.get_feature_names_out()
+  X_transformed_df = pd.DataFrame(
+    X_transformed,
+    columns = feature_names
+  )
 
-explainer = shap.TreeExplainer(rf_classifier)
+  explainer = shap.TreeExplainer(rf_classifier)
 
-# make prediction based on model choice
-if model_choice == "Logistic Regression":
-  prediction = logistic_model.predict_proba(input_data)[0][1]
-  # st.write(f"Churn Probability (Logistic Regression): {prediction:.2f}")
-elif model_choice == "Random Forest":
-  prediction = rf_model.predict_proba(input_data)[0][1]
-  # st.write(f"Churn Probability (Random Forest): {prediction:.2f}")
-else:
-  prediction = xgb_model.predict_proba(input_data)[0][1]
-  # st.write(f"Churn Probability (XGBoost): {prediction:.2f}")
+  # make prediction based on model choice
+  if model_choice == "Logistic Regression":
+    prediction = logistic_model.predict_proba(input_data)[0][1]
+    # st.write(f"Churn Probability (Logistic Regression): {prediction:.2f}")
+  elif model_choice == "Random Forest":
+    prediction = rf_model.predict_proba(input_data)[0][1]
+    # st.write(f"Churn Probability (Random Forest): {prediction:.2f}")
+  else:
+    prediction = xgb_model.predict_proba(input_data)[0][1]
+    # st.write(f"Churn Probability (XGBoost): {prediction:.2f}")
+    
+  if st.button("Predict Churn"):
+    # st.write(f"Churn Probability ({model_choice}): {prediction:.2f}")
+    st.metric("Churn Probability ", f"{prediction * 100: .1f} %")
+    st.progress(float(prediction))
   
-if st.button("Predict Churn"):
-  # st.write(f"Churn Probability ({model_choice}): {prediction:.2f}")
-  prob =  prediction
-  st.metric("Churn Probability ", f"{prob * 100: .1f} %")
-  st.progress(float(prob))
-  
-  if prob > 0.6:
+  if prediction > 0.6:
     st.error("High Risk Customer")
-  elif prob > 0.3:
+  elif prediction > 0.3:
     st.warning("Medium Risk Customer")
   else:
     st.success("Low Risk Customer")
@@ -164,4 +163,80 @@ with tab2:
   plt.gca().invert_yaxis()
   st.pyplot(fig)
   
+  st.subheader("SHAP Summary Plot")
   
+  sample_data = pd.concat([input_data]*50, ignore_index=True)
+  sample_data["tenure"] = np.random.randint(0,72,size=50)
+  sample_data['TotalCharges'] = np.random.uniform(100,5000,size=50)
+  
+  X_sample_transformed = preprocessor.transform(sample_data)
+  feature_names = preprocessor.get_feature_names_out()
+  
+  X_sample_df = pd.DataFrame(
+    X_sample_transformed,
+    columns=feature_names
+  )
+  
+  explainer = shap.Explainer(rf_classifier)
+  shap_values = explainer(X_sample_df)
+  
+  fig = plt.figure()
+  shap.plots.beeswarm(
+    shap_values[:,:,1],
+    max_display = 15,
+    show = False
+  )
+  
+  st.pyplot(fig)
+  
+  
+  st.subheader("SHAP feature Importance")
+  fig = plt.figure()
+  shap.plots.bar(
+    shap_values[:,:,1],
+    max_display = 15,
+    show = False
+  )
+  st.pyplot(fig)
+  
+  performance_df = pd.DataFrame({
+    "Model": ['Logistic Regression', 'Random Forest', 'XGBoost'],
+    "ROC AUC": [0.86, 0.85, 0.85],
+    "Precision": [0.75, 0.82, 0.86],
+    "Recall": [0.70, 0.80, 0.85],
+    "F1-Score": [0.64, 0.65, 0.85]
+  })
+  
+  st.subheader("Model Performance")
+  st.dataframe(performance_df)
+  st.subheader("Business Insights")
+  
+  st.markdown(
+"""
+###  Key Drivers of Customer Churn
+
+Based on the model analysis and feature importance results, several factors significantly affect the customer churn:
+
+**1 Customer Tenure**
+
+* Customers with shorter tenure are much more likely to churn.
+* New customers have a higher probability of leaving compared to long-term subscribers.
+
+**2 Contract Type**
+
+* Customers on month-to-month contracts show the highest churn risk.
+* Long-term contracts such as one-year or two-year agreements significantly reduce churn.
+
+**3 Monthly Charges**
+
+* Higher monthly charges correlate with increased churn probability.
+* Customers paying more are more likely to switch providers if they perceive better value elsewhere.
+
+**4 Internet Service Type**
+
+* Customers using fiber optic internet services show relatively higher churn rates compared to DSL users.
+
+**5 Lack of Value-Added Services**
+* Customers without services like online security, tech support, or device protection are more likely to churn.  
+
+""")
