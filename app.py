@@ -86,5 +86,56 @@ with tab1:
       'MonthlyCharges': [monthly_charges], 
       'TotalCharges': [total_charges]
   })
+
+
+X_transformed = preprocessor.transform(input_data)
+feature_names =  preprocessor.get_feature_names_out()
+X_transformed_df = pd.DataFrame(
+  X_transformed,
+  columns = feature_names
+)
+
+explainer = shap.TreeExplainer(rf_classifier)
+
+# make prediction based on model choice
+if model_choice == "Logistic Regression":
+  prediction = logistic_model.predict_proba(input_data)[0][1]
+  # st.write(f"Churn Probability (Logistic Regression): {prediction:.2f}")
+elif model_choice == "Random Forest":
+  prediction = rf_model.predict_proba(input_data)[0][1]
+  # st.write(f"Churn Probability (Random Forest): {prediction:.2f}")
+else:
+  prediction = xgb_model.predict_proba(input_data)[0][1]
+  # st.write(f"Churn Probability (XGBoost): {prediction:.2f}")
   
+if st.button("Predict Churn"):
+  # st.write(f"Churn Probability ({model_choice}): {prediction:.2f}")
+  prob =  prediction
+  st.metric("Churn Probability ", f"{prob * 100: .1f} %")
+  st.progress(float(prob))
+  
+  if prob > 0.6:
+    st.error("High Risk Customer")
+  elif prob > 0.3:
+    st.warning("Medium Risk Customer")
+  else:
+    st.success("Low Risk Customer")
+  
+  st.write(f"Model Used: ** {model_choice}")
+  
+  
+  st.subheader("Prediction Explanation (SHAP)")
+  X_transformed = preprocessor.transform(input_data)
+  explainer = shap.Explainer(rf_classifier)
+  shap_values = explainer(X_transformed_df)
+  
+  fig = plt.figure()
+  
+  shap.plots.waterfall(
+    shap_values[0, :, 1],
+    show = False
+  )
+  st.pyplot(fig)
+  
+
   
