@@ -138,4 +138,30 @@ if st.button("Predict Churn"):
   st.pyplot(fig)
   
 
+
+# code for tab2
+with tab2:
+  st.title("Model Insights")
+  st.write("Feature importance and insights from the model")
+  
+  preprocessor = rf_model.named_steps['preprocessor']
+  feature_names = preprocessor.get_feature_names_out()
+  
+  rf_classifier = rf_model.named_steps['model']
+  rf_importance = rf_classifier.feature_importances_
+  
+  importance_df = pd.DataFrame({
+    'Feature': feature_names,
+    'Importance': rf_importance
+  }).sort_values(by='Importance', ascending=False)
+  
+  top_features = importance_df.head(15)
+  
+  fig, ax = plt.subplots(figsize=(10, 6))
+  ax.barh(top_features['Feature'], top_features['Importance'])
+  ax.set_xlabel("Feature Importance")
+  ax.set_title("Top Drivers of Customer churn")
+  plt.gca().invert_yaxis()
+  st.pyplot(fig)
+  
   
