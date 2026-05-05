@@ -64,5 +64,27 @@ with tab1:
                                       max_value=10000.0, value=2000.0)
   
   
+  # create a dataframe from the input data
+  input_data = pd.DataFrame({
+      'gender': [gender], 
+      'SeniorCitizen': [senior_citizen], 
+      'Partner': [partner], 
+      'Dependents': [dependents],
+      'tenure': [tenure], 
+      'PhoneService': [phone_service], 
+      'MultipleLines': [multiple_lines], 
+      'InternetService': [internet_service],
+      'OnlineSecurity': [online_security], 
+      'OnlineBackup': [online_backup], 
+      'DeviceProtection': [device_protection], 
+      'TechSupport': [tech_support],
+      'StreamingTV': [streaming_tv], 
+      'StreamingMovies': [streaming_movies], 
+      'Contract': [contract], 
+      'PaperlessBilling': [paperless_billing],
+      'PaymentMethod': [payment_method], 
+      'MonthlyCharges': [monthly_charges], 
+      'TotalCharges': [total_charges]
+  })
   
   
