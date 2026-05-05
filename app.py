@@ -17,9 +17,15 @@ rf_classifier = rf_model.named_steps['model']
 
 # code for tab1
 with tab1:
-  st.title("Customer Churn Prediction App")
-  st.write("Enter customer details to predict churn probability")
-
+  st.markdown("""
+<h1 style='text-align: center; color: #4CAF;'>
+📊 Customer Churn Intelligence
+</h1>
+<p style='text-align: center; font-size:18px;'>
+Predict. Understand. Retain.
+</p>
+""", unsafe_allow_html=True)
+  
   # drop down for model selection
   model_choice = st.selectbox(
     "Select a model",
@@ -129,8 +135,15 @@ with tab1:
   
 # code for tab2
 with tab2:
-  st.title("Model Insights")
-  st.write("Feature importance and insights from the model")
+  st.markdown("""
+<h1 style='text-align: center; color: #4CAF;'>
+📉 Model Insights
+</h1>
+<p style='text-align: center; font-size:18px;'>
+Predict. Understand. Retain.
+</p>
+""", unsafe_allow_html=True)
+  st.subheader("Feature importance and insights from the model")
   
   preprocessor = rf_model.named_steps['preprocessor']
   feature_names = preprocessor.get_feature_names_out()
@@ -225,8 +238,8 @@ Based on the model analysis and feature importance results, several factors sign
 * Customers without services like online security, tech support, or device protection are more likely to churn.  
 
 """)
-st.subheader("Business Recommendations")
-st.markdown("""
+  st.subheader("Business Recommendations")
+  st.markdown("""
 * Encourage long-term contracts through discounts or loyalty rewards.
 * Offer bundled services (security, tech support) to increase customer retention.
 * Provide special retention offers for high-charge customers to reduce churn risk.
