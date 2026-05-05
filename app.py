@@ -5,18 +5,15 @@ import matplotlib.pyplot as plt
 from joblib import load
 import shap 
 
-
 # load the trained models
 logistic_model = load("models/logistic_model.pkl")
 rf_model = load("models/rf_model.pkl")
 xgb_model = load("models/xgb_model.pkl")
 
-
 # make interface of the app
 tab1, tab2 = st.tabs(['Prediction', 'Model insights'])
 preprocessor = rf_model.named_steps['preprocessor']
 rf_classifier = rf_model.named_steps['model']
-
 
 # code for tab1
 with tab1:
@@ -62,8 +59,6 @@ with tab1:
                                       max_value=1000.0, value=70.0)
   total_charges = st.number_input("Total Charges", min_value=0.0,
                                       max_value=10000.0, value=2000.0)
-  
-  
   # create a dataframe from the input data
   input_data = pd.DataFrame({
       'gender': [gender], 
@@ -86,15 +81,12 @@ with tab1:
       'MonthlyCharges': [monthly_charges], 
       'TotalCharges': [total_charges]
   })
-
-
   X_transformed = preprocessor.transform(input_data)
   feature_names =  preprocessor.get_feature_names_out()
   X_transformed_df = pd.DataFrame(
     X_transformed,
     columns = feature_names
   )
-
   explainer = shap.TreeExplainer(rf_classifier)
 
   # make prediction based on model choice
@@ -122,7 +114,6 @@ with tab1:
   
   st.write(f"Model Used: ** {model_choice}")
   
-  
   st.subheader("Prediction Explanation (SHAP)")
   X_transformed = preprocessor.transform(input_data)
   explainer = shap.Explainer(rf_classifier)
@@ -136,8 +127,6 @@ with tab1:
   )
   st.pyplot(fig)
   
-
-
 # code for tab2
 with tab2:
   st.title("Model Insights")
@@ -176,7 +165,6 @@ with tab2:
     X_sample_transformed,
     columns=feature_names
   )
-  
   explainer = shap.Explainer(rf_classifier)
   shap_values = explainer(X_sample_df)
   
@@ -188,7 +176,6 @@ with tab2:
   )
   
   st.pyplot(fig)
-  
   
   st.subheader("SHAP feature Importance")
   fig = plt.figure()
@@ -209,8 +196,6 @@ with tab2:
   
   st.subheader("Model Performance")
   st.dataframe(performance_df)
-  st.subheader("Business Insights")
-  
   st.markdown(
 """
 ###  Key Drivers of Customer Churn
@@ -238,5 +223,13 @@ Based on the model analysis and feature importance results, several factors sign
 
 **5 Lack of Value-Added Services**
 * Customers without services like online security, tech support, or device protection are more likely to churn.  
+
+""")
+st.subheader("Business Recommendations")
+st.markdown("""
+* Encourage long-term contracts through discounts or loyalty rewards.
+* Offer bundled services (security, tech support) to increase customer retention.
+* Provide special retention offers for high-charge customers to reduce churn risk.
+* Focus retention campaigns on new customers with low tenure.
 
 """)
